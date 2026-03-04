@@ -3,105 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bisswiz - Card Game</title>
+    <title>function — Future Error Prediction · Phu Quoc Nguyen</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <!-- Login Screen -->
-    <div id="loginScreen" class="screen">
-        <div class="login-container">
-            <h1>🃏 Bisswiz</h1>
-            <p class="tagline">Card Game · 2–4 Players · First Team to 500 Points Wins!</p>
-            <div class="login-section">
-                <label for="loginName">Your Name:</label>
-                <input type="text" id="loginName" placeholder="Enter your name" class="name-input" maxlength="30">
-                <p id="loginError" class="login-error hidden">Please enter your name to continue.</p>
-            </div>
-            <button id="playGameBtn" class="btn-primary btn-play">▶ Play Game</button>
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
+    <header class="app-header">
+        <div class="header-brand">
+            <span class="brand-icon">⚛️</span>
+            <span class="brand-name">function</span>
+            <span class="brand-sub">Future Error Prediction System</span>
         </div>
-    </div>
-
-    <!-- Setup Screen -->
-    <div id="setupScreen" class="screen hidden">
-        <div class="setup-container">
-            <h1>🃏 Bisswiz</h1>
-            <p class="tagline">Card Game · 2–4 Players · First Team to 500 Points Wins!</p>
-
-            <div class="setup-section">
-                <label>Number of Players:</label>
-                <div class="player-count-btns">
-                    <button class="count-btn active" data-count="2">2 Players</button>
-                    <button class="count-btn" data-count="3">3 Players</button>
-                    <button class="count-btn" data-count="4">4 Players</button>
-                </div>
-            </div>
-
-            <div id="playerSetup" class="setup-section"></div>
-
-            <div class="setup-section">
-                <label>Starting Credits:</label>
-                <input type="number" id="startingCredits" value="500" min="100" max="9999" class="credits-input">
-            </div>
-
-            <button id="startGameBtn" class="btn-primary">🎮 Start Game</button>
+        <div class="header-status">
+            <span class="status-dot" id="qzxDot"></span>
+            <span class="status-label" id="qzxLabel">Quantum ZX Core — Initialising…</span>
         </div>
-    </div>
+        <div class="header-credits">
+            <span class="credit-badge">Copilot GPT5.5</span>
+            <span class="credit-badge">Phu AI</span>
+            <span class="credit-badge">Phuoptimizer 81</span>
+        </div>
+    </header>
 
-    <!-- Game Screen -->
-    <div id="gameScreen" class="screen hidden">
-        <div class="game-layout">
+    <!-- ── Main Layout ────────────────────────────────────────────────────── -->
+    <main class="app-main">
 
-            <!-- Scoreboard sidebar -->
-            <aside class="scoreboard">
-                <h2>🏆 Scores</h2>
-                <div id="scoreDisplay"></div>
-                <div class="target-info">First to <strong>500 pts</strong> wins!</div>
-                <div class="round-badge">Round <span id="roundBadge">1</span></div>
-            </aside>
+        <!-- Left column: input + results -->
+        <section class="col-left">
 
-            <!-- Main table -->
-            <div class="game-table">
-                <div id="opponentsArea" class="opponents-area"></div>
-
-                <div class="center-area">
-                    <div id="trickArea" class="trick-area"></div>
-                    <div id="roundInfo" class="round-info"></div>
+            <!-- Target input card -->
+            <div class="panel" id="inputPanel">
+                <h2 class="panel-title">🔭 Scan Target</h2>
+                <div class="form-row">
+                    <label for="targetInput">URL / App Name / Game Title</label>
+                    <input type="text" id="targetInput" class="text-input"
+                           placeholder="e.g. pubers.blog  or  MyGame v2.0"
+                           maxlength="200" autocomplete="off">
                 </div>
-
-                <div class="player-area">
-                    <div class="player-info">
-                        <span id="playerNameDisplay" class="player-name"></span>
-                        <span id="playerCreditsDisplay" class="player-credits"></span>
+                <div class="form-row">
+                    <label>Target Type</label>
+                    <div class="type-btns">
+                        <button class="type-btn active" data-type="website">🌐 Website</button>
+                        <button class="type-btn" data-type="webapp">📱 Web App</button>
+                        <button class="type-btn" data-type="app">🖥️ App</button>
+                        <button class="type-btn" data-type="game">🎮 Game</button>
                     </div>
-                    <div id="playerHand" class="card-hand"></div>
+                </div>
+                <div class="form-row">
+                    <label for="optLevel">Phuoptimizer Level <span id="optLevelVal">81</span></label>
+                    <input type="range" id="optLevel" min="1" max="81" value="81" class="range-input">
+                </div>
+                <div class="form-row toggle-row">
+                    <label for="qboost">Quantum Boost</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="qboost" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <button class="btn-primary btn-scan" id="scanBtn">
+                    <span id="scanBtnLabel">⚡ Predict Future Errors</span>
+                </button>
+                <p id="scanError" class="scan-error hidden">Please enter a target URL, app name, or game title.</p>
+            </div>
+
+            <!-- Prediction results -->
+            <div class="panel" id="resultsPanel">
+                <h2 class="panel-title">🔮 Predicted Errors
+                    <span class="result-count hidden" id="resultCount"></span>
+                </h2>
+                <div id="resultsBody">
+                    <p class="results-placeholder">Run a scan to see future error predictions.</p>
                 </div>
             </div>
 
-        </div>
+        </section>
 
-        <!-- Betting Panel (modal) -->
-        <div id="bettingPanel" class="modal-overlay hidden">
-            <div class="modal-box">
-                <h3>💰 Place Your Bet</h3>
-                <p id="betRoundLabel">Bet for Round 1:</p>
-                <input type="number" id="betAmount" value="10" min="0" class="bet-input">
-                <button id="placeBetBtn" class="btn-primary">Confirm Bet</button>
+        <!-- Right column: QZX visualiser + dispatch + log -->
+        <section class="col-right">
+
+            <!-- Quantum ZX Core visualiser -->
+            <div class="panel panel-qzx">
+                <h2 class="panel-title">⚛️ Quantum ZX Core</h2>
+                <canvas id="qzxCanvas" width="360" height="180"></canvas>
+                <div class="qzx-stats" id="qzxStats">
+                    <div class="qzx-stat"><span class="stat-label">State</span><span class="stat-val" id="qzxState">Superposition</span></div>
+                    <div class="qzx-stat"><span class="stat-label">Entanglement</span><span class="stat-val" id="qzxEnt">82%</span></div>
+                    <div class="qzx-stat"><span class="stat-label">GPT Engine</span><span class="stat-val">Copilot GPT5.5</span></div>
+                    <div class="qzx-stat"><span class="stat-label">Protocol</span><span class="stat-val" id="qzxProto">Quantum</span></div>
+                </div>
+            </div>
+
+            <!-- Fix Dispatch Panel -->
+            <div class="panel" id="dispatchPanel">
+                <h2 class="panel-title">📡 Dispatch Fix Request</h2>
+                <p class="dispatch-info">Send the selected errors to an agent for resolution.</p>
+                <div class="dispatch-btns">
+                    <button class="btn-dispatch btn-phu" id="dispatchPhuAI" disabled>
+                        <span class="dispatch-icon">🧠</span>
+                        <span class="dispatch-label">Send to Phu AI</span>
+                    </button>
+                    <button class="btn-dispatch btn-opt" id="dispatchOpt81" disabled>
+                        <span class="dispatch-icon">⚙️</span>
+                        <span class="dispatch-label">Send to Phuoptimizer 81</span>
+                    </button>
+                    <button class="btn-dispatch btn-blog" id="dispatchBlog" disabled>
+                        <span class="dispatch-icon">📝</span>
+                        <span class="dispatch-label">Send to pubers.blog</span>
+                    </button>
+                </div>
+                <div class="select-hint" id="dispatchHint">Complete a scan first, then select errors to dispatch.</div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="panel panel-log">
+                <h2 class="panel-title">📋 Activity Log</h2>
+                <div id="activityLog" class="activity-log">
+                    <div class="log-entry log-system">System initialised. Quantum ZX Core standby.</div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ── Dispatch Modal ─────────────────────────────────────────────────── -->
+    <div id="dispatchModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="dispatchModalTitle">
+        <div class="modal-box">
+            <h3 id="dispatchModalTitle">📡 Dispatch Confirmation</h3>
+            <p id="dispatchModalBody"></p>
+            <div class="modal-actions">
+                <button class="btn-primary btn-confirm" id="dispatchConfirmBtn">Confirm & Send</button>
+                <button class="btn-cancel" id="dispatchCancelBtn">Cancel</button>
             </div>
         </div>
-
-        <!-- Game message toast -->
-        <div id="gameMessage" class="game-message"></div>
     </div>
 
-    <!-- Win Screen -->
-    <div id="winScreen" class="screen hidden">
-        <div class="win-container">
-            <div id="winMessage"></div>
-            <div id="finalScores"></div>
-            <button id="playAgainBtn" class="btn-primary">🔄 Play Again</button>
-        </div>
-    </div>
+    <!-- ── Toast ──────────────────────────────────────────────────────────── -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script src="script.js"></script>
 </body>

@@ -1,484 +1,517 @@
-// Bisswiz Card Game
+// ── function — Future Error Prediction System ─────────────────────────────
+// Built by Phu Quoc Nguyen  ·  Powered by Quantum ZX Core + Copilot GPT5.5
 
-const SUITS = ['♠', '♥', '♦', '♣'];
-const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-const IS_RED = { '♥': true, '♦': true, '♠': false, '♣': false };
+'use strict';
 
-// Points per card rank (Ace=11, 10=10, K=4, Q=3, J=2, others=0)
-const CARD_POINTS = { A: 11, 10: 10, K: 4, Q: 3, J: 2 };
+// ── Error Prediction Database ─────────────────────────────────────────────
+// Template library used to generate realistic predicted errors per target type.
 
-// Numeric rank order for comparisons
-const RANK_ORDER = { 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:10, J:11, Q:12, K:13, A:14 };
+const ERROR_TEMPLATES = {
+    website: [
+        { title: 'SSL Certificate Expiry', sev: 'critical', type: 'Security',    etaDays: [3, 14]  },
+        { title: 'Broken Internal Links (404)', sev: 'medium', type: 'UX',        etaDays: [1, 7]   },
+        { title: 'Mixed Content Warning',  sev: 'high',   type: 'Security',    etaDays: [5, 20]  },
+        { title: 'DNS Propagation Delay',  sev: 'medium', type: 'Infra',       etaDays: [1, 4]   },
+        { title: 'Missing Alt Text on Images', sev: 'low', type: 'Accessibility', etaDays: [7, 30] },
+        { title: 'Unoptimised Images (>2 MB)', sev: 'medium', type: 'Performance', etaDays: [2, 10] },
+        { title: 'JavaScript Runtime Exception', sev: 'critical', type: 'Code', etaDays: [1, 5]  },
+        { title: 'Cookie Consent GDPR Failure', sev: 'high', type: 'Legal',    etaDays: [2, 8]   },
+        { title: 'Slow TTFB (>2 s)',        sev: 'medium', type: 'Performance', etaDays: [3, 12]  },
+        { title: 'Outdated CMS Plugin',    sev: 'high',   type: 'Security',    etaDays: [1, 6]   },
+    ],
+    webapp: [
+        { title: 'Null Pointer Exception on Login', sev: 'critical', type: 'Code', etaDays: [1, 3] },
+        { title: 'Session Token Expiry Misconfiguration', sev: 'high', type: 'Security', etaDays: [2, 10] },
+        { title: 'API Rate-Limit Exceeded',  sev: 'high',   type: 'Infra',    etaDays: [1, 5]   },
+        { title: 'Race Condition in State Update', sev: 'critical', type: 'Code', etaDays: [2, 7] },
+        { title: 'Unhandled Promise Rejection', sev: 'medium', type: 'Code',   etaDays: [1, 4]   },
+        { title: 'Memory Leak in React Component', sev: 'high', type: 'Performance', etaDays: [3, 14] },
+        { title: 'SQL Injection Vulnerability', sev: 'critical', type: 'Security', etaDays: [1, 3] },
+        { title: 'CORS Policy Misconfiguration', sev: 'high', type: 'Security', etaDays: [1, 6]  },
+        { title: 'Infinite Re-render Loop',  sev: 'medium', type: 'Code',      etaDays: [2, 8]   },
+        { title: 'Stale Cache Serving Old UI', sev: 'medium', type: 'Infra',   etaDays: [1, 4]   },
+    ],
+    app: [
+        { title: 'Crash on Startup (iOS 17.4+)', sev: 'critical', type: 'Compatibility', etaDays: [1, 5] },
+        { title: 'Excessive Battery Drain',  sev: 'high',   type: 'Performance', etaDays: [2, 10]  },
+        { title: 'Push Notification Delivery Failure', sev: 'high', type: 'Infra', etaDays: [1, 4] },
+        { title: 'Deprecated API Usage',    sev: 'medium', type: 'Code',       etaDays: [7, 30]  },
+        { title: 'Data Race in Background Thread', sev: 'critical', type: 'Code', etaDays: [2, 6] },
+        { title: 'In-App Purchase Validation Bug', sev: 'critical', type: 'Business', etaDays: [1, 3] },
+        { title: 'Incorrect Permissions Request', sev: 'medium', type: 'Privacy', etaDays: [5, 15] },
+        { title: 'UI Layout Break on Tablet', sev: 'low',   type: 'UX',        etaDays: [3, 14]  },
+        { title: 'Keychain Storage Leak',   sev: 'high',   type: 'Security',   etaDays: [2, 8]   },
+        { title: 'Analytics SDK Crash',     sev: 'medium', type: 'Stability',  etaDays: [1, 5]   },
+    ],
+    game: [
+        { title: 'Save-File Corruption on Level 7', sev: 'critical', type: 'Data', etaDays: [1, 4] },
+        { title: 'Anti-Cheat False Positive',  sev: 'high',   type: 'Gameplay', etaDays: [2, 8]  },
+        { title: 'Physics Engine Desync (Multiplayer)', sev: 'critical', type: 'Netcode', etaDays: [1, 5] },
+        { title: 'Memory Overflow on Map Load', sev: 'high', type: 'Performance', etaDays: [2, 7] },
+        { title: 'Shader Compilation Crash (AMD GPU)', sev: 'critical', type: 'Graphics', etaDays: [1, 3] },
+        { title: 'Infinite Respawn Loop',   sev: 'medium', type: 'Gameplay',   etaDays: [1, 6]   },
+        { title: 'Leaderboard Score Manipulation', sev: 'high', type: 'Security', etaDays: [2, 8] },
+        { title: 'Voice Chat Echo / Feedback', sev: 'medium', type: 'Audio',   etaDays: [3, 10]  },
+        { title: 'Controller Deadzone Miscalibration', sev: 'low', type: 'Input', etaDays: [5, 20] },
+        { title: 'DLC Entitlement Validation Failure', sev: 'critical', type: 'Business', etaDays: [1, 4] },
+    ],
+};
 
-const TARGET_SCORE = 500;
+// ── Quantum ZX Core Particle System ─────────────────────────────────────────
 
-class BisswizGame {
-    constructor() {
-        this.players = [];
-        this.teams = [];          // array of arrays of player indices
-        this.teamScores = [];     // cumulative game scores per team
-        this.roundNumber = 0;
-        this.currentTrick = [];   // [{playerIndex, card}]
-        this.currentPlayer = 0;
-        this.trickLeader = 0;
-        this.bets = [];           // bet amount per player for current round
-        this.betIndex = 0;
-        this.bettingPhase = false;
-        this.playingPhase = false;
+class QuantumZXCore {
+    constructor(canvas) {
+        this.canvas  = canvas;
+        this.ctx     = canvas.getContext('2d');
+        this.w       = canvas.width;
+        this.h       = canvas.height;
+        this.particles = [];
+        this.connections = [];
+        this.frame   = 0;
+        this.active  = true;
+        this.states  = ['Superposition', 'Entangled', 'Coherent', 'Optimized', 'Collapsed'];
+        this.stateIdx = 0;
+        this._stateTimer = 0;
 
-        this.setupEventListeners();
-        this.updatePlayerSetup(2);
+        this._initParticles();
+        this._loop();
     }
 
-    // ── Setup ────────────────────────────────────────────────────────────────
+    _initParticles() {
+        const count = 28;
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x:   Math.random() * this.w,
+                y:   Math.random() * this.h,
+                vx:  (Math.random() - 0.5) * 0.6,
+                vy:  (Math.random() - 0.5) * 0.6,
+                r:   Math.random() * 2.5 + 1,
+                hue: Math.random() * 60 + 180,   // cyan-purple range
+                phase: Math.random() * Math.PI * 2,
+            });
+        }
+    }
 
-    setupEventListeners() {
-        document.getElementById('playGameBtn').addEventListener('click', () => this.handleLogin());
-        document.getElementById('loginName').addEventListener('keydown', e => {
-            if (e.key === 'Enter') this.handleLogin();
-        });
+    _loop() {
+        if (!this.active) return;
+        this._update();
+        this._draw();
+        requestAnimationFrame(() => this._loop());
+    }
 
-        document.querySelectorAll('.count-btn').forEach(btn => {
-            btn.addEventListener('click', e => {
-                document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                this.updatePlayerSetup(parseInt(e.target.dataset.count));
+    _update() {
+        this.frame++;
+        this._stateTimer++;
+        if (this._stateTimer > 150) {
+            this._stateTimer = 0;
+            this.stateIdx = (this.stateIdx + 1) % this.states.length;
+            const el = document.getElementById('qzxState');
+            if (el) el.textContent = this.states[this.stateIdx];
+        }
+
+        // Update entanglement display
+        if (this.frame % 40 === 0) {
+            const entEl = document.getElementById('qzxEnt');
+            if (entEl) entEl.textContent = (75 + Math.floor(Math.random() * 15)) + '%';
+        }
+
+        for (const p of this.particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.phase += 0.03;
+            if (p.x < 0 || p.x > this.w) p.vx *= -1;
+            if (p.y < 0 || p.y > this.h) p.vy *= -1;
+        }
+    }
+
+    _draw() {
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, this.w, this.h);
+
+        // Draw connection lines
+        for (let i = 0; i < this.particles.length; i++) {
+            for (let j = i + 1; j < this.particles.length; j++) {
+                const a = this.particles[i];
+                const b = this.particles[j];
+                const dx = a.x - b.x;
+                const dy = a.y - b.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 80) {
+                    ctx.beginPath();
+                    ctx.moveTo(a.x, a.y);
+                    ctx.lineTo(b.x, b.y);
+                    ctx.strokeStyle = `rgba(0,195,255,${0.18 * (1 - dist / 80)})`;
+                    ctx.lineWidth = 0.7;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Draw particles
+        for (const p of this.particles) {
+            const alpha = 0.6 + 0.4 * Math.sin(p.phase);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `hsla(${p.hue}, 90%, 65%, ${alpha})`;
+            ctx.fill();
+
+            // Glow
+            const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+            grad.addColorStop(0, `hsla(${p.hue}, 90%, 65%, ${alpha * 0.25})`);
+            grad.addColorStop(1, 'transparent');
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+        }
+
+        // Scan-line sweep when running
+        if (this._scanning) {
+            const x = ((this.frame * 3) % this.w);
+            const sweepGrad = ctx.createLinearGradient(x - 20, 0, x + 20, 0);
+            sweepGrad.addColorStop(0, 'transparent');
+            sweepGrad.addColorStop(0.5, 'rgba(0,195,255,0.35)');
+            sweepGrad.addColorStop(1, 'transparent');
+            ctx.fillStyle = sweepGrad;
+            ctx.fillRect(x - 20, 0, 40, this.h);
+        }
+    }
+
+    startScan()  { this._scanning = true; }
+    stopScan()   { this._scanning = false; }
+    destroy()    { this.active = false; }
+}
+
+// ── Main Application ──────────────────────────────────────────────────────
+
+class FunctionApp {
+    constructor() {
+        this.targetType   = 'website';
+        this.predictions  = [];
+        this.selectedIds  = new Set();
+        this.scanning     = false;
+        this._toastTimer  = null;
+        this._pendingDispatch = null;
+
+        this.qzx = new QuantumZXCore(document.getElementById('qzxCanvas'));
+
+        this._bindEvents();
+        this._setQZXStatus('online', 'Quantum ZX Core — Online');
+        this._log('System initialised. Copilot GPT5.5 engine ready.', 'system');
+        this._log('Phuoptimizer 81 connected. Phu AI standing by.', 'system');
+    }
+
+    // ── Event Binding ─────────────────────────────────────────────────────
+
+    _bindEvents() {
+        // Type selector
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.targetType = btn.dataset.type;
             });
         });
 
-        document.getElementById('startGameBtn').addEventListener('click', () => this.startGame());
-        document.getElementById('placeBetBtn').addEventListener('click', () => this.placeBet());
-        document.getElementById('playAgainBtn').addEventListener('click', () => {
-            document.getElementById('winScreen').classList.add('hidden');
-            document.getElementById('loginScreen').classList.remove('hidden');
+        // Optimization level label
+        const optSlider = document.getElementById('optLevel');
+        optSlider.addEventListener('input', () => {
+            document.getElementById('optLevelVal').textContent = optSlider.value;
         });
+
+        // Scan button
+        document.getElementById('scanBtn').addEventListener('click', () => this._startScan());
+
+        // Enter key in input
+        document.getElementById('targetInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') this._startScan();
+        });
+
+        // Dispatch buttons
+        document.getElementById('dispatchPhuAI').addEventListener('click', () =>
+            this._openDispatch('phuai', 'Phu AI', '🧠'));
+        document.getElementById('dispatchOpt81').addEventListener('click', () =>
+            this._openDispatch('opt81', 'Phuoptimizer 81', '⚙️'));
+        document.getElementById('dispatchBlog').addEventListener('click', () =>
+            this._openDispatch('blog', 'pubers.blog', '📝'));
+
+        // Modal confirm / cancel
+        document.getElementById('dispatchConfirmBtn').addEventListener('click', () => this._confirmDispatch());
+        document.getElementById('dispatchCancelBtn').addEventListener('click', () => this._closeModal());
     }
 
-    handleLogin() {
-        const nameInput = document.getElementById('loginName');
-        const name = nameInput.value.trim();
-        const errorEl = document.getElementById('loginError');
+    // ── Scan Logic ────────────────────────────────────────────────────────
 
-        if (!name) {
-            errorEl.classList.remove('hidden');
-            nameInput.focus();
+    _startScan() {
+        if (this.scanning) return;
+
+        const raw = document.getElementById('targetInput').value.trim();
+        const errEl = document.getElementById('scanError');
+
+        if (!raw) {
+            errEl.classList.remove('hidden');
+            document.getElementById('targetInput').focus();
             return;
         }
+        errEl.classList.add('hidden');
 
-        errorEl.classList.add('hidden');
+        this.scanning = true;
+        this.selectedIds.clear();
+        this.predictions = [];
 
-        // Pre-fill Player 1's name from the login field
-        const p1Input = document.getElementById('pName0');
-        if (p1Input) p1Input.value = name;
+        const btn = document.getElementById('scanBtn');
+        btn.disabled = true;
+        document.getElementById('scanBtnLabel').innerHTML =
+            '<span class="spinner"></span> Scanning…';
+        btn.classList.add('scanning');
+        this.qzx.startScan();
+        this._setQZXStatus('working', 'Quantum ZX Core — Scanning…');
 
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('setupScreen').classList.remove('hidden');
+        this._log(`Scan initiated → [${this.targetType.toUpperCase()}] ${this._sanitise(raw)}`, 'scan');
+
+        // Simulate async quantum processing delay (1.8 – 3.2 s)
+        const delay = 1800 + Math.random() * 1400;
+        setTimeout(() => this._completeScan(raw), delay);
     }
 
-    updatePlayerSetup(count) {
-        const container = document.getElementById('playerSetup');
-        const loginName = document.getElementById('loginName')?.value?.trim() || '';
-        container.innerHTML = '';
-        for (let i = 0; i < count; i++) {
-            const isHuman = i === 0;
-            const defaultName = isHuman ? (loginName || 'Player 1') : 'CPU ' + i;
-            const div = document.createElement('div');
-            div.className = 'player-input-row';
-            div.innerHTML = `
-                <label>Player ${i + 1}${isHuman ? ' (You)' : ' (CPU)'}:</label>
-                <input type="text" id="pName${i}" value="${defaultName}" class="name-input">
-            `;
-            container.appendChild(div);
-        }
-    }
+    _completeScan(target) {
+        const templates = ERROR_TEMPLATES[this.targetType] || ERROR_TEMPLATES.website;
+        const optLevel  = parseInt(document.getElementById('optLevel').value);
+        const qboost    = document.getElementById('qboost').checked;
 
-    startGame() {
-        const playerCount = parseInt(document.querySelector('.count-btn.active').dataset.count);
-        const startCredits = Math.max(100, parseInt(document.getElementById('startingCredits').value) || 500);
+        // Select 3–7 errors based on opt level and quantum boost
+        const baseCount = 3 + Math.floor((optLevel / 81) * 4);
+        const count     = Math.min(templates.length, baseCount + (qboost ? 1 : 0));
 
-        this.players = Array.from({ length: playerCount }, (_, i) => ({
-            name: document.getElementById(`pName${i}`).value.trim() || `Player ${i + 1}`,
-            isHuman: i === 0,
-            hand: [],
-            credits: startCredits,
-            pointsWon: 0,
-            tricksWon: 0,
+        // Shuffle and pick
+        const shuffled = [...templates].sort(() => Math.random() - 0.5);
+        this.predictions = shuffled.slice(0, count).map((tpl, i) => ({
+            id:         i,
+            title:      tpl.title,
+            sev:        tpl.sev,
+            type:       tpl.type,
+            confidence: 72 + Math.floor(Math.random() * 27),   // 72–98%
+            eta:        this._randomEta(tpl.etaDays),
+            target:     this._sanitise(target),
         }));
 
-        // Team assignment
-        if (playerCount === 4) {
-            this.teams = [[0, 2], [1, 3]];
-        } else {
-            // 2 or 3 players: each is their own team
-            this.teams = this.players.map((_, i) => [i]);
+        this._renderResults();
+
+        // Reset scan UI
+        this.scanning = false;
+        const btn = document.getElementById('scanBtn');
+        btn.disabled = false;
+        document.getElementById('scanBtnLabel').textContent = '⚡ Predict Future Errors';
+        btn.classList.remove('scanning');
+        this.qzx.stopScan();
+        this._setQZXStatus('online', 'Quantum ZX Core — Online');
+
+        this._log(`Scan complete. ${this.predictions.length} future errors predicted for "${this._sanitise(target)}".`, 'success');
+
+        const criticals = this.predictions.filter(p => p.sev === 'critical').length;
+        if (criticals > 0) {
+            this._log(`⚠ ${criticals} CRITICAL error(s) detected — dispatch recommended.`, 'error');
         }
 
-        this.teamScores = this.teams.map(() => 0);
-        this.roundNumber = 0;
-
-        document.getElementById('setupScreen').classList.add('hidden');
-        document.getElementById('gameScreen').classList.remove('hidden');
-
-        this.startRound();
+        this._toast(`${this.predictions.length} errors predicted · ${criticals} critical`);
     }
 
-    // ── Deck ─────────────────────────────────────────────────────────────────
+    // ── Rendering ─────────────────────────────────────────────────────────
 
-    createShuffledDeck() {
-        const deck = [];
-        for (const suit of SUITS) {
-            for (const rank of RANKS) {
-                deck.push({ suit, rank, points: CARD_POINTS[rank] || 0 });
-            }
-        }
-        for (let i = deck.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [deck[i], deck[j]] = [deck[j], deck[i]];
-        }
-        return deck;
-    }
+    _renderResults() {
+        const body    = document.getElementById('resultsBody');
+        const countEl = document.getElementById('resultCount');
+        body.innerHTML = '';
 
-    dealCards() {
-        const deck = this.createShuffledDeck();
-        const n = this.players.length;
-        const perPlayer = Math.floor(52 / n);
-        this.players.forEach((player, i) => {
-            player.hand = deck.slice(i * perPlayer, (i + 1) * perPlayer);
-            // Sort by suit then rank
-            player.hand.sort((a, b) =>
-                SUITS.indexOf(a.suit) !== SUITS.indexOf(b.suit)
-                    ? SUITS.indexOf(a.suit) - SUITS.indexOf(b.suit)
-                    : RANK_ORDER[a.rank] - RANK_ORDER[b.rank]
-            );
-            player.pointsWon = 0;
-            player.tricksWon = 0;
-        });
-    }
-
-    // ── Round lifecycle ───────────────────────────────────────────────────────
-
-    startRound() {
-        this.roundNumber++;
-        document.getElementById('roundBadge').textContent = this.roundNumber;
-        this.currentTrick = [];
-        this.bets = new Array(this.players.length).fill(0);
-
-        this.dealCards();
-        this.updateScoreboard();
-
-        // Betting phase
-        this.bettingPhase = true;
-        this.playingPhase = false;
-        this.betIndex = 0;
-        this.processBetting();
-    }
-
-    processBetting() {
-        if (this.betIndex >= this.players.length) {
-            // All bets placed — start play
-            this.bettingPhase = false;
-            this.playingPhase = true;
-            this.currentTrick = [];
-            this.currentPlayer = this.trickLeader;
-            this.renderGame();
-            this.showMessage(`Round ${this.roundNumber} starts! ${this.players[this.currentPlayer].name} leads.`);
-            if (!this.players[this.currentPlayer].isHuman) {
-                setTimeout(() => this.cpuPlayCard(), 900);
-            }
+        if (this.predictions.length === 0) {
+            body.innerHTML = '<p class="results-placeholder">No errors predicted.</p>';
+            countEl.classList.add('hidden');
+            this._updateDispatchButtons();
             return;
         }
 
-        const player = this.players[this.betIndex];
-        if (player.isHuman) {
-            const panel = document.getElementById('bettingPanel');
-            const input = document.getElementById('betAmount');
-            document.getElementById('betRoundLabel').textContent = `Bet for Round ${this.roundNumber} (you have ${player.credits} credits):`;
-            input.max = Math.max(0, player.credits);
-            input.value = Math.min(10, player.credits);
-            panel.classList.remove('hidden');
-            this.showMessage(`💰 ${player.name}, place your bet!`);
-        } else {
-            // CPU bets a small random amount (capped at 20% of credits, 0 if broke)
-            const maxBet = Math.floor(player.credits * 0.2);
-            const bet = player.credits > 0 ? Math.floor(Math.random() * maxBet) + 1 : 0;
-            this.bets[this.betIndex] = Math.min(bet, player.credits);
-            this.betIndex++;
-            this.processBetting();
-        }
-    }
+        countEl.textContent = this.predictions.length;
+        countEl.classList.remove('hidden');
 
-    placeBet() {
-        const player = this.players[this.betIndex];
-        let bet = parseInt(document.getElementById('betAmount').value) || 0;
-        bet = Math.max(0, Math.min(bet, player.credits));
-        this.bets[this.betIndex] = bet;
-        document.getElementById('bettingPanel').classList.add('hidden');
-        this.betIndex++;
-        this.processBetting();
-    }
-
-    // ── Rendering ─────────────────────────────────────────────────────────────
-
-    renderGame() {
-        this.renderPlayerHand();
-        this.renderOpponents();
-        this.renderTrickArea();
-        this.updateScoreboard();
-        this.updatePlayerInfo();
-    }
-
-    renderPlayerHand() {
-        const hand = document.getElementById('playerHand');
-        hand.innerHTML = '';
-        const player = this.players[0];
-        player.hand.forEach((card, index) => {
-            const el = this.makeCardElement(card);
-            const playable = this.playingPhase &&
-                             this.currentPlayer === 0 &&
-                             this.isCardPlayable(card, player.hand);
-            if (playable) {
-                el.classList.add('playable');
-                el.addEventListener('click', () => this.humanPlayCard(index));
-            }
-            hand.appendChild(el);
-        });
-    }
-
-    renderOpponents() {
-        const area = document.getElementById('opponentsArea');
-        area.innerHTML = '';
-        for (let i = 1; i < this.players.length; i++) {
-            const player = this.players[i];
-            const isCurrent = this.playingPhase && this.currentPlayer === i;
-            const div = document.createElement('div');
-            div.className = 'opponent-area';
-            div.innerHTML = `
-                <div class="opponent-name${isCurrent ? ' active' : ''}">
-                    ${player.name}${isCurrent ? ' ▶' : ''}
-                </div>
-                <div class="opponent-hand">
-                    ${player.hand.map(() => '<div class="card card-back">🃏</div>').join('')}
-                </div>
-                <div class="opponent-stats">
-                    💰 ${player.credits} credits &nbsp;|&nbsp; 🃏 ${player.hand.length} cards
-                </div>
-            `;
-            area.appendChild(div);
-        }
-    }
-
-    renderTrickArea() {
-        const area = document.getElementById('trickArea');
-        area.innerHTML = '';
-        this.currentTrick.forEach(({ playerIndex, card }) => {
-            const el = this.makeCardElement(card);
-            el.classList.add('played');
-            const label = document.createElement('span');
-            label.className = 'player-label';
-            label.textContent = this.players[playerIndex].name;
-            el.appendChild(label);
-            area.appendChild(el);
-        });
-
-        const pot = this.bets.reduce((a, b) => a + b, 0);
-        document.getElementById('roundInfo').innerHTML = `
-            <div>Round ${this.roundNumber} &nbsp;|&nbsp; 💰 Pot: ${pot} credits</div>
-            <div>${this.players.map(p => `${p.name}: ${p.tricksWon} tricks`).join(' &nbsp;|&nbsp; ')}</div>
-        `;
-    }
-
-    makeCardElement(card) {
-        const el = document.createElement('div');
-        el.className = `card ${IS_RED[card.suit] ? 'red' : 'black'}`;
-        el.innerHTML = `<span class="c-rank">${card.rank}</span><span class="c-suit">${card.suit}</span>`;
-        return el;
-    }
-
-    updateScoreboard() {
-        const display = document.getElementById('scoreDisplay');
-        display.innerHTML = '';
-        this.teams.forEach((team, i) => {
-            const score = this.teamScores[i];
-            const progress = Math.min(100, (score / TARGET_SCORE) * 100);
-            const div = document.createElement('div');
-            div.className = 'score-row';
-            div.innerHTML = `
-                <div class="team-name">${this.teamName(i)}</div>
-                <div class="score-bar-container"><div class="score-bar" style="width:${progress}%"></div></div>
-                <div class="score-value">${score} / 500</div>
-            `;
-            display.appendChild(div);
-        });
-    }
-
-    updatePlayerInfo() {
-        const p = this.players[0];
-        document.getElementById('playerNameDisplay').textContent = p.name;
-        document.getElementById('playerCreditsDisplay').textContent = `💰 ${p.credits} credits`;
-    }
-
-    // ── Game logic ────────────────────────────────────────────────────────────
-
-    isCardPlayable(card, hand) {
-        if (this.currentTrick.length === 0) return true;
-        const ledSuit = this.currentTrick[0].card.suit;
-        const hasSuit = hand.some(c => c.suit === ledSuit);
-        return hasSuit ? card.suit === ledSuit : true;
-    }
-
-    humanPlayCard(cardIndex) {
-        if (!this.playingPhase || this.currentPlayer !== 0) return;
-        const player = this.players[0];
-        if (!this.isCardPlayable(player.hand[cardIndex], player.hand)) return;
-        this.playCard(0, cardIndex);
-    }
-
-    cpuPlayCard() {
-        if (!this.playingPhase) return;
-        const idx = this.currentPlayer;
-        const player = this.players[idx];
-        const playable = player.hand
-            .map((card, i) => ({ card, i }))
-            .filter(({ card }) => this.isCardPlayable(card, player.hand));
-
-        // Simple AI: always play the highest available playable card
-        playable.sort((a, b) => RANK_ORDER[b.card.rank] - RANK_ORDER[a.card.rank]);
-        this.playCard(idx, playable[0].i);
-    }
-
-    playCard(playerIndex, cardIndex) {
-        const player = this.players[playerIndex];
-        const card = player.hand.splice(cardIndex, 1)[0];
-        this.currentTrick.push({ playerIndex, card });
-        this.renderGame();
-
-        if (this.currentTrick.length === this.players.length) {
-            setTimeout(() => this.resolveTrick(), 1000);
-        } else {
-            this.currentPlayer = (this.currentPlayer + 1) % this.players.length;
-            this.renderGame();
-            if (!this.players[this.currentPlayer].isHuman) {
-                setTimeout(() => this.cpuPlayCard(), 800);
-            }
-        }
-    }
-
-    resolveTrick() {
-        const ledSuit = this.currentTrick[0].card.suit;
-        let winnerSlot = 0;
-        let highest = RANK_ORDER[this.currentTrick[0].card.rank];
-        for (let i = 1; i < this.currentTrick.length; i++) {
-            const { card } = this.currentTrick[i];
-            if (card.suit === ledSuit && RANK_ORDER[card.rank] > highest) {
-                highest = RANK_ORDER[card.rank];
-                winnerSlot = i;
-            }
-        }
-
-        const winnerPlayerIndex = this.currentTrick[winnerSlot].playerIndex;
-        const trickPts = this.currentTrick.reduce((s, { card }) => s + (CARD_POINTS[card.rank] || 0), 0);
-
-        this.players[winnerPlayerIndex].tricksWon++;
-        this.players[winnerPlayerIndex].pointsWon += trickPts;
-
-        this.showMessage(`${this.players[winnerPlayerIndex].name} wins the trick! +${trickPts} pts`);
-
-        this.trickLeader = winnerPlayerIndex;
-        this.currentPlayer = winnerPlayerIndex;
-        this.currentTrick = [];
-
-        if (this.players[0].hand.length === 0) {
-            setTimeout(() => this.endRound(), 1200);
-        } else {
-            setTimeout(() => {
-                this.renderGame();
-                if (!this.players[this.currentPlayer].isHuman) {
-                    setTimeout(() => this.cpuPlayCard(), 800);
+        // Select-all row
+        const selAll = document.createElement('label');
+        selAll.className = 'select-all-row';
+        const chkAll = document.createElement('input');
+        chkAll.type = 'checkbox';
+        chkAll.id  = 'selectAll';
+        chkAll.addEventListener('change', () => {
+            this.predictions.forEach(p => {
+                if (chkAll.checked) {
+                    this.selectedIds.add(p.id);
+                } else {
+                    this.selectedIds.delete(p.id);
                 }
-            }, 1200);
-        }
-    }
-
-    endRound() {
-        // Add round points to team scores
-        this.teams.forEach((team, i) => {
-            const pts = team.reduce((s, pi) => s + this.players[pi].pointsWon, 0);
-            this.teamScores[i] += pts;
+            });
+            document.querySelectorAll('.error-card').forEach(card => {
+                card.classList.toggle('selected', chkAll.checked);
+            });
+            this._updateDispatchButtons();
         });
+        selAll.appendChild(chkAll);
+        selAll.appendChild(document.createTextNode(' Select all errors for dispatch'));
+        body.appendChild(selAll);
 
-        // Determine which team won this round (most points)
-        let roundWinner = 0;
-        let maxPts = -1;
-        this.teams.forEach((team, i) => {
-            const pts = team.reduce((s, pi) => s + this.players[pi].pointsWon, 0);
-            if (pts > maxPts) { maxPts = pts; roundWinner = i; }
-        });
+        // Error cards
+        const order = { critical: 0, high: 1, medium: 2, low: 3 };
+        const sorted = [...this.predictions].sort((a, b) => order[a.sev] - order[b.sev]);
 
-        // Credits transfer: winning team collects all bets (remainder goes to first winner)
-        const pot = this.bets.reduce((a, b) => a + b, 0);
-        this.players.forEach((p, i) => { p.credits -= this.bets[i]; });
-        const winTeam = this.teams[roundWinner];
-        const baseShare = Math.floor(pot / winTeam.length);
-        const remainder = pot - baseShare * winTeam.length;
-        winTeam.forEach((pi, j) => { this.players[pi].credits += baseShare + (j === 0 ? remainder : 0); });
+        sorted.forEach(pred => {
+            const card = document.createElement('div');
+            card.className = `error-card sev-${pred.sev}`;
+            card.dataset.id = pred.id;
 
-        this.updateScoreboard();
-
-        const summary = this.teams
-            .map((team, i) => {
-                const pts = team.reduce((s, pi) => s + this.players[pi].pointsWon, 0);
-                return `${this.teamName(i)}: ${pts} pts`;
-            })
-            .join(' | ');
-        this.showMessage(`Round ${this.roundNumber} over! ${summary}`);
-
-        // Check win condition
-        const winner = this.teamScores.findIndex(s => s >= TARGET_SCORE);
-        if (winner !== -1) {
-            setTimeout(() => this.endGame(winner), 1500);
-        } else {
-            setTimeout(() => this.startRound(), 2500);
-        }
-    }
-
-    endGame(winnerTeamIdx) {
-        document.getElementById('gameScreen').classList.add('hidden');
-        const winScreen = document.getElementById('winScreen');
-
-        document.getElementById('winMessage').innerHTML = `
-            <h1>🎉 Game Over!</h1>
-            <h2>${this.teamName(winnerTeamIdx)} Wins!</h2>
-            <p>Reached ${this.teamScores[winnerTeamIdx]} points — first to ${TARGET_SCORE}!</p>
-        `;
-
-        document.getElementById('finalScores').innerHTML = `
-            <h3>Final Scores</h3>
-            ${this.teamScores.map((score, i) => `
-                <div class="final-score-row">
-                    <span>${this.teamName(i)}</span>
-                    <span>${score} pts</span>
-                    <span>💰 ${this.teams[i].map(pi => this.players[pi].credits).join(' / ')} credits</span>
+            card.innerHTML = `
+                <div class="error-card-header">
+                    <span class="error-sev-badge">${pred.sev}</span>
+                    <span class="error-title">${this._sanitise(pred.title)}</span>
                 </div>
-            `).join('')}
-        `;
+                <div class="error-card-meta">
+                    <span>📂 ${this._sanitise(pred.type)}</span>
+                    <span class="error-eta">⏳ ~${this._sanitise(pred.eta)}</span>
+                    <span>🎯 ${pred.confidence}% confidence</span>
+                </div>
+                <div class="confidence-bar-wrap">
+                    <div class="confidence-bar" style="width:${pred.confidence}%"></div>
+                </div>
+            `;
 
-        winScreen.classList.remove('hidden');
+            card.addEventListener('click', () => this._toggleSelect(pred.id, card));
+            body.appendChild(card);
+        });
+
+        this._updateDispatchButtons();
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    _toggleSelect(id, card) {
+        if (this.selectedIds.has(id)) {
+            this.selectedIds.delete(id);
+            card.classList.remove('selected');
+        } else {
+            this.selectedIds.add(id);
+            card.classList.add('selected');
+        }
+        this._updateDispatchButtons();
 
-    teamName(teamIndex) {
-        return this.teams[teamIndex].map(i => this.players[i].name).join(' & ');
+        const selAll = document.getElementById('selectAll');
+        if (selAll) {
+            selAll.checked = this.selectedIds.size === this.predictions.length;
+            selAll.indeterminate = this.selectedIds.size > 0 && this.selectedIds.size < this.predictions.length;
+        }
     }
 
-    showMessage(msg) {
-        const el = document.getElementById('gameMessage');
+    _updateDispatchButtons() {
+        const hasSelection = this.selectedIds.size > 0;
+        document.getElementById('dispatchPhuAI').disabled  = !hasSelection;
+        document.getElementById('dispatchOpt81').disabled  = !hasSelection;
+        document.getElementById('dispatchBlog').disabled   = !hasSelection;
+
+        const hint = document.getElementById('dispatchHint');
+        if (this.predictions.length === 0) {
+            hint.textContent = 'Complete a scan first, then select errors to dispatch.';
+        } else if (!hasSelection) {
+            hint.textContent = `Select one or more errors above to enable dispatch (${this.predictions.length} available).`;
+        } else {
+            hint.textContent = `${this.selectedIds.size} error(s) selected · Ready to dispatch.`;
+        }
+    }
+
+    // ── Dispatch ──────────────────────────────────────────────────────────
+
+    _openDispatch(agent, label, icon) {
+        if (this.selectedIds.size === 0) return;
+        this._pendingDispatch = { agent, label, icon };
+
+        const selErrors = this.predictions.filter(p => this.selectedIds.has(p.id));
+        const names = selErrors.map(p => `• [${p.sev.toUpperCase()}] ${p.title}`).join('\n');
+
+        document.getElementById('dispatchModalBody').textContent =
+            `Send ${this.selectedIds.size} error(s) to ${icon} ${label} for automated resolution?\n\n${names}`;
+        document.getElementById('dispatchModal').classList.remove('hidden');
+    }
+
+    _confirmDispatch() {
+        const { agent, label, icon } = this._pendingDispatch;
+        this._closeModal();
+
+        const selErrors = this.predictions.filter(p => this.selectedIds.has(p.id));
+        const target    = selErrors[0]?.target || 'unknown';
+
+        this._log(`Dispatching ${selErrors.length} fix request(s) → ${icon} ${label} via Quantum ZX Core…`, 'dispatch');
+        this._setQZXStatus('working', `Quantum ZX Core — Dispatching to ${label}…`);
+
+        // Simulate network round-trip (1–2 s)
+        setTimeout(() => {
+            selErrors.forEach(p => {
+                this._log(`✓ [${p.sev.toUpperCase()}] "${p.title}" → ${label} · fix queued.`, 'success');
+            });
+            const protocol = document.getElementById('qzxProto').textContent;
+            this._log(`${icon} ${label} acknowledged ${selErrors.length} task(s) · Protocol: ${protocol} · Engine: Copilot GPT5.5`, 'success');
+            this._setQZXStatus('online', 'Quantum ZX Core — Online');
+            this._toast(`${selErrors.length} fix(es) dispatched to ${label} ✓`);
+
+            // Optionally open the external destination in a new tab
+            if (agent === 'blog') {
+                window.open('https://pubers.blog', '_blank', 'noopener,noreferrer');
+            }
+        }, 1000 + Math.random() * 1000);
+    }
+
+    _closeModal() {
+        document.getElementById('dispatchModal').classList.add('hidden');
+        this._pendingDispatch = null;
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────
+
+    _sanitise(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    _randomEta([minDays, maxDays]) {
+        const days = minDays + Math.floor(Math.random() * (maxDays - minDays + 1));
+        if (days === 1) return '1 day';
+        if (days < 7)  return `${days} days`;
+        const weeks = Math.round(days / 7);
+        return `${weeks} week${weeks > 1 ? 's' : ''}`;
+    }
+
+    _log(msg, cls = 'system') {
+        const log  = document.getElementById('activityLog');
+        const ts   = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${cls}`;
+        // Use textContent to avoid XSS from user-supplied strings inside log messages
+        entry.textContent = `[${ts}] ${msg}`;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    _toast(msg) {
+        const el = document.getElementById('toast');
         el.textContent = msg;
         el.classList.add('show');
-        clearTimeout(this._msgTimer);
-        this._msgTimer = setTimeout(() => el.classList.remove('show'), 3000);
+        clearTimeout(this._toastTimer);
+        this._toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+    }
+
+    _setQZXStatus(cls, label) {
+        const dot  = document.getElementById('qzxDot');
+        const lbl  = document.getElementById('qzxLabel');
+        dot.className  = `status-dot ${cls}`;
+        lbl.textContent = label;
     }
 }
 
-window.addEventListener('DOMContentLoaded', () => { new BisswizGame(); });
+// ── Boot ──────────────────────────────────────────────────────────────────
 
+window.addEventListener('DOMContentLoaded', () => { new FunctionApp(); });
