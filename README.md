@@ -1,41 +1,43 @@
-# Phuoptimizer-81
+# function — Future Error Prediction System
 
-## 🚀 Phu AI Web Application
+## 🔮 Built by Phu Quoc Nguyen · Powered by Quantum ZX Core + Copilot GPT5.5
 
-A quantum-powered puzzle and problem solver with advanced AI capabilities featuring:
-- 🧠 **Phu AI** - Advanced puzzle solving engine
-- ⚛️ **Quantum ZX Core** - Real-time quantum visualization
-- 🔮 **Future Prediction** - Quantum probability analysis
-- ⚙️ **Phuoptimizer 81** - Optimization control (levels 1-81)
-- 🔗 **Phubers Protocol** - Advanced quantum processing
-- 📺 **helloPhú YouTube** - Channel integration
+**function** is a browser-based application that uses quantum-probability analysis
+to predict future errors in websites, web apps, native apps, and games — then
+dispatches automated fix requests to the appropriate resolution agents.
 
-### Planned Capabilities
-- 🌐 Multi-language conversation and translation support
-- 🧮 Advanced mathematics and complex problem-solving
-- ☁️ Cloud mining webapp mode for distributed compute experiments
-- 💳 Optional payment collection with owner payout flow for hosted deployments
+### Core Features
+
+| Feature | Description |
+|---|---|
+| 🔭 **Scan any target** | Enter a URL, app name, or game title and select its type |
+| 🔮 **Future error prediction** | Predicts errors before they occur with confidence scores & ETAs |
+| ⚛️ **Quantum ZX Core** | Real-time particle visualiser showing quantum system state |
+| 🧠 **Phu AI dispatch** | Send selected errors to Phu AI for automated resolution |
+| ⚙️ **Phuoptimizer 81** | Send selected errors to Phuoptimizer 81 (levels 1–81) |
+| 📝 **pubers.blog** | Dispatch errors to pubers.blog for community-driven fixes |
+| 🤖 **Copilot GPT5.5** | AI engine powering all predictions and dispatch coordination |
 
 ### Quick Start
-1. Open `index.html` in your web browser
-2. Enter a puzzle or problem in the text area
-3. Click "Solve with Phu AI" to get quantum-powered solutions
+
+1. Open `index.html` in any modern web browser (no server required)
+2. Type a target URL, app, or game name in the **Scan Target** panel
+3. Choose the target type: Website / Web App / App / Game
+4. Adjust the **Phuoptimizer Level** slider (1–81) and enable **Quantum Boost**
+5. Click **⚡ Predict Future Errors**
+6. Review predictions in the results panel (click cards to select)
+7. Click **Send to Phu AI**, **Send to Phuoptimizer 81**, or **Send to pubers.blog**
 
 ### Commit Messages
-Use a short, clear summary in the imperative mood. If you follow a simple prefix, keep it consistent.
 
-Example commit messages:
-- `docs: add commit message guidance`
-- `fix: handle empty puzzle input`
-- `ui: refine solve button label`
+Use a short, clear summary in the imperative mood.
 
-### Example Queries
-- `What is 25 + 17?`
-- `Fibonacci sequence for n=10`
-- `Is 17 a prime number?`
-- `Predict the future of quantum computing`
+Examples:
+- `feat: add new error template for mobile apps`
+- `fix: handle empty target input`
+- `ui: refine dispatch button styling`
 
-For detailed documentation, see [README-WEBAPP.md](README-WEBAPP.md)
+For detailed documentation see [README-WEBAPP.md](README-WEBAPP.md)
 
 ---
 
